@@ -9,7 +9,7 @@ node('built-in') {
     }
     stage('continous deployment')
     {
-    sh 'scp /home/ubuntu/.jenkins/workspace/scripted-pipeline/webapp/target/webapp.war ubuntu@172.31.36.151:/var/lib/tomcat9/webapps/testapp.war'
+    sh 'scp /home/ubuntu/.jenkins/workspace/multibranch-pipeline_main/webapp/target/webapp.war ubuntu@172.31.36.151:/var/lib/tomcat9/webapps/testapp.war'
     }
     
 	}
