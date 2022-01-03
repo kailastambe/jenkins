@@ -1,57 +1,23 @@
-pipeline
-{
-    agent any
-    stages
+node('built-in') {
+    stage('continous download') 
     {
-        stage('ContinuousDownload')
-        {
-            steps
-            {
-                git 'https://github.com/kailastambe/jenkins.git'
-            }
-        }
-        stage('ContinuousBuild')
-        {
-            steps
-            {
-                sh 'mvn package'
-            }
-        }
-        stage('ContinuousDeployment')
-        {
-            steps
-            {
-               deploy adapters: [tomcat9(credentialsId: 'bfb67f1d-2f4e-430c-bb8d-30584116bd00', path: '', url: 'http://172.31.51.212:9090')], contextPath: 'test1', war: '**/*.war'
-            }
-        }
-        stage('ContinuousTesting')
-        {
-            steps
-            {
-               git 'https://github.com/kailastambe/Functional-testing.git'
-               sh 'java -jar /home/ubuntu/.jenkins/workspace/DeclarativePipeline1/testing.jar'
-            }
-        }
-       
+    git branch: 'main', url: 'https://github.com/kailastambe/jenkins.git'
     }
-    
-    post
+    stage('continous build') 
     {
-        success
-        {
-            input message: 'Need approval from the DM!', submitter: 'srinivas'
-               deploy adapters: [tomcat9(credentialsId: 'bfb67f1d-2f4e-430c-bb8d-30584116bd00', path: '', url: 'http://172.31.50.204:9090')], contextPath: 'prod1', war: '**/*.war'
-        }
-        failure
-        {
-            mail bcc: '', body: 'Continuous Integration has failed', cc: '', from: '', replyTo: '', subject: 'CI Failed', to: 'selenium.saikrishna@gmail.com'
-        }
-       
+    sh 'mvn package'
     }
-    
-    
-    
-    
-    
-    
-}
+    stage('continous deployment')
+    {
+    sh 'scp /home/ubuntu/.jenkins/workspace/scripted-pipeline/webapp/target/webapp.war ubuntu@172.31.36.151:/var/lib/tomcat9/webapps/testapp.war'
+    }
+    stage('continous testing')
+        {
+      git branch: 'main', url: 'https://github.com/kailastambe/Functional-testing.git' 
+      sh 'java -jar /home/ubuntu/.jenkins/workspace/new-pipeline/testing.jar'
+        }
+    stage('continous delivery')
+    {
+    sh 'scp /home/ubuntu/.jenkins/workspace/scripted-pipeline/webapp/target/webapp.war ubuntu@172.31.37.235:/var/lib/tomcat9/webapps/prodapp.war'
+    }
+	}
